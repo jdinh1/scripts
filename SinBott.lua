@@ -19,6 +19,7 @@ g_SinBott = nil
 
 class 'CSinBott'
 function CSinBott:__init(app)
+  self.name = "Assassin"
   self.app = app
   self.game = app.Game
   self.dx = app.DirectX
@@ -37,6 +38,10 @@ function CSinBott:__init(app)
   self.queuedkeys = { }
   
   print("CSinBott()") --debug
+end
+
+function CSinBott:GetScriptName()
+  return self.name
 end
 
 function CSinBott:Macro1()
@@ -228,11 +233,14 @@ function CSinBott:GetDistance(obj)
 end
 
 function CSinBott:ListObjects()
+  if not self.enabled then
+    return
+  end
   local x = 10
   local y = 100 
   local olddist = 999
   local target = nil
-    
+  
   self.fontObjectList:Draw(x,y,0,0, clYellow, string.format("count %d", #self.objects))
   
   local out = Vector3(0,0,0)
@@ -287,10 +295,9 @@ function CSinBott:OnUpdate()
   
   if self.enabled then
     sBotStatus = "ON"
-	color = clGreen
+    color = clGreen
+    self.fontObjectList:Draw(10,90,0,0, color, string.format("[F2] PriestBot %s", sBotStatus))
   end
-    
-  self.fontObjectList:Draw(10,100,0,0, color, string.format("[F3] SinBott %s", sBotStatus))
   
   if not self.enabled then
     return
@@ -342,6 +349,15 @@ function CSinBott:WindowProc(msg)
 	self.mouse.y = HIWORD(msg.lParam)
   end	
 end
+
+function CSinBott:Disable()
+  self.enabled = false
+end
+
+function CSinBott:Enable()
+  self.enabled = true
+end
+
 
 --------------- // -------------
 

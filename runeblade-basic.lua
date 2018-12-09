@@ -20,6 +20,7 @@ g_RuneBladerBot = nil
 
 class 'CRuneBladerBot'
 function CRuneBladerBot:__init(app)
+  self.name = "RuneBlader"
   self.app = app
   self.game = app.Game
   self.dx = app.DirectX
@@ -38,6 +39,10 @@ function CRuneBladerBot:__init(app)
   self.queuedkeys = { }
   
   print("CRuneBladerBot()") --debug
+end
+
+function CRuneBladerBot:GetScriptName()
+  return self.name
 end
 
 function CRuneBladerBot:Flurry()
@@ -206,6 +211,10 @@ function CRuneBladerBot:GetDistance(obj)
 end
 
 function CRuneBladerBot:ListObjects()
+  if not self.enabled then
+    return
+  end
+
   local x = 10
   local y = 100 
   local olddist = 999
@@ -267,10 +276,19 @@ end
 function CRuneBladerBot:OnUpdate()
   --self.fontDesc:Draw(100,200,0,0, clGreen, string.format("MapID - %u", self.game:GetCurrentMapID()))
   
+  local color = clRed
+  local sBotStatus = "OFF"
+  
+  if self.enabled then
+    sBotStatus = "ON"
+    color = clGreen
+    self.fontObjectList:Draw(10,90,0,0, color, string.format("[F2] PriestBot %s", sBotStatus))
+  end
+
   self.myPC = self.game:GetMyPC()
   if not self.myPC then
     return
-  end
+  end  
   
   self.state = self.myPC:GetSubState()
   self.camera = self.game:GetCamera()
@@ -280,10 +298,10 @@ function CRuneBladerBot:OnUpdate()
   local out = Vector3(0,0,0)  
   local pos = self.myPC:GetPos()
     	
-  if self.camera:WorldToScreen(pos, out) then
+  if (self.camera:WorldToScreen(pos, out) and self.enabled) then
     self.fontObjectList:Draw(out.x,out.y,0,0, clYellow, string.format("%d", self.state))
-	self:DrawArea(self.camera, 3*100, clLightBlue, pos) --3m radius
-	self:DrawArea(self.camera, 8*100, clYellow, pos) --8m radius
+    self:DrawArea(self.camera, 3*100, clLightBlue, pos) --3m radius
+    self:DrawArea(self.camera, 8*100, clYellow, pos) --8m radius
   end    
   
   local target = self:ListObjects()
@@ -301,17 +319,25 @@ function CRuneBladerBot:OnUpdate()
   self:KeyPressManager()
 end
 
+function CRuneBladerBot:Disable()
+  self.enabled = false  
+end
+
+function CRuneBladerBot:Enable()
+  self.enabled = true
+end
+
 function CRuneBladerBot:WindowProc(msg)
-   if msg.message == WM_KEYUP then
-    if msg.wParam == VK_F2 then
-      self.enabled = not self.enabled
-      self:KeyPressManager()
+  --  if msg.message == WM_KEYUP then
+  --   if msg.wParam == VK_F2 then
+  --     self.enabled = not self.enabled
+  --     self:KeyPressManager()
       
-	end
-  elseif msg.message == WM_MOUSEMOVE then
-    self.mouse.x = LOWORD(msg.lParam)
-	self.mouse.y = HIWORD(msg.lParam)
-  end	
+	-- end
+  -- elseif msg.message == WM_MOUSEMOVE then
+  --   self.mouse.x = LOWORD(msg.lParam)
+	-- self.mouse.y = HIWORD(msg.lParam)
+  -- end	
 end
 
 --------------- // -------------

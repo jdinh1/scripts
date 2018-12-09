@@ -14,6 +14,7 @@ g_PriestBot = nil
 
 class 'CPriestBot'
 function CPriestBot:__init(app)
+  self.name = "Priest"
   self.app = app
   self.game = app.Game
   self.dx = app.DirectX
@@ -32,6 +33,10 @@ function CPriestBot:__init(app)
   self.queuedkeys = { }
   
   print("CPriestBot()") --debug
+end
+
+function CPriestBot:GetScriptName()
+  return self.name
 end
 
 function CPriestBot:CelestialLight()
@@ -235,32 +240,31 @@ function CPriestBot:ListObjects()
   for i = 1, #self.objects do
    
     local pc = self.objects[i]
-	local oid = pc:GetOID()
+	  local oid = pc:GetOID()
      
-	if pc:GetType() ~= 2 and  --drops are type 2 then we ignore them
-	   oid > 0x10000 and  --npcs oids are usually < 0x10000, not a safe way but works
-	   pc:GetHealth() > 0 and --ignore if dead
-	   pc:GetMaxHealth() > 150000.0 
-	   then --this check is for identifying targets in lulu village map, also, without this pets and players are also listed (an uid will be added soon)	   
-	   if oid ~= self.myPC:GetOID() then	    
-	    
-		 local dist = self:GetDistance(pc)
-	     local pos = pc:GetPos()
-		 		 
-		 y = y + 10
-         self.fontObjectList:Draw(x,y,0,0, clYellow, string.format("%02.0f M", dist))
-		 
-		 if self.camera:WorldToScreen(pos, out) then		  
-		   self.fontObjectList:Draw(out.x,out.y,0,0, clGreen, string.format("%1.0fM", dist))
-         end
-		 
-	     if dist < olddist then
-	       olddist = dist
-		   target = pc
-	     end
-	   end
-	end
-  end  
+    if pc:GetType() ~= 2 and  --drops are type 2 then we ignore them
+      oid > 0x10000 and  --npcs oids are usually < 0x10000, not a safe way but works
+      pc:GetHealth() > 0 and --ignore if dead
+      pc:GetMaxHealth() > 150000.0 
+      then --this check is for identifying targets in lulu village map, also, without this pets and players are also listed (an uid will be added soon)	   
+      if oid ~= self.myPC:GetOID() then	            
+        local dist = self:GetDistance(pc)
+          local pos = pc:GetPos()
+            
+        y = y + 10
+            self.fontObjectList:Draw(x,y,0,0, clYellow, string.format("%02.0f M", dist))
+        
+        if self.camera:WorldToScreen(pos, out) then		  
+          self.fontObjectList:Draw(out.x,out.y,0,0, clGreen, string.format("%1.0fM", dist))
+        end
+      
+      if dist < olddist then
+        olddist = dist
+        target = pc
+      end
+    end
+  end
+end  
   
   -- check if our target is visible on screen
   
@@ -282,10 +286,11 @@ function CPriestBot:OnUpdate()
   
   if self.enabled then
     sBotStatus = "ON"
-	color = clGreen
+    color = clGreen
+    self.fontObjectList:Draw(10,90,0,0, color, string.format("[F2] PriestBot %s", sBotStatus))
   end
     
-  self.fontObjectList:Draw(10,90,0,0, color, string.format("[F2] PriestBot %s", sBotStatus))
+  -- self.fontObjectList:Draw(10,90,0,0, color, string.format("[F2] PriestBot %s", sBotStatus))
   
   if not self.enabled then
     return
@@ -305,10 +310,10 @@ function CPriestBot:OnUpdate()
   local out = Vector3(0,0,0)  
   local pos = self.myPC:GetPos()
     	
-  if self.camera:WorldToScreen(pos, out) then
+  if (self.camera:WorldToScreen(pos, out) and self.enabled) then
     self.fontObjectList:Draw(out.x,out.y,0,0, clYellow, string.format("%d", self.state))
-	self:DrawArea(self.camera, 4*100, clLightBlue, pos) --4m radius
-	self:DrawArea(self.camera, 8*100, clYellow, pos) --8m radius
+    self:DrawArea(self.camera, 4*100, clLightBlue, pos) --4m radius
+    self:DrawArea(self.camera, 8*100, clYellow, pos) --8m radius
   end    
   
   local target = self:ListObjects()
@@ -336,6 +341,14 @@ function CPriestBot:WindowProc(msg)
     self.mouse.x = LOWORD(msg.lParam)
 	self.mouse.y = HIWORD(msg.lParam)
   end	
+end
+
+function CPriestBot:Disable()
+  self.enabled = false
+end
+
+function CPriestBot:Enable()
+  self.enabled = true
 end
 
 --------------- // -------------

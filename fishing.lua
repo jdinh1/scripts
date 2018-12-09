@@ -1,7 +1,8 @@
-local g_FishingBot = nil
+g_FishingBot = nil
 
 class 'CFishingBot'
 function CFishingBot:__init(app)
+  self.name = "Auto Fishing"
   self.app = app
   self.game = app.Game
   self.dx = app.DirectX
@@ -22,6 +23,10 @@ function CFishingBot:__init(app)
 	bottom = self.imgBtnBG.Height
   }
   print("CFishingBot()") --debug
+end
+
+function CFishingBot:GetScriptName()
+  return self.name
 end
 
 function CFishingBot:MousePtInRect(rect)
@@ -91,6 +96,15 @@ end
 function CFishingBot:GetClientTime()
   return self.mainsystem:GetClientTime()
 end
+
+function CFishingBot:Disable()
+  self.enabled = false
+end
+
+function CFishingBot:Enable()
+  self.enabled = true
+end
+
 
 function bytes(buf)
   result = "";
