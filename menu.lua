@@ -106,6 +106,8 @@ function CMenu:WindowProc(msg)
     end
     if msg.wParam == VK_F11 then
       self:DisableAllScripts() -- Turn off current running script
+      self.previousMenuIndex = 0
+      self.currentMenuIndex = 1
     end
     if msg.wParam == VK_DOWN then -- Navigate down the menu
       self:UpdateCurrentMenuSelection(2)  
